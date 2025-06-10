@@ -174,6 +174,7 @@
     /* Pattern */
     void pattern_set_type(port_info_t * pinfo, char *str);
     void pattern_set_user_pattern(port_info_t * pinfo, char *str);
+    void pattern_set_hex_pattern(port_info_t *pinfo, char *soffset, char *sbytes);
 
     uint16_t tcp_flags_from_str(const char *str);
     int tcp_str_from_flags(uint16_t flags, char *buf, size_t len);

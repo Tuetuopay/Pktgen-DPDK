@@ -3340,6 +3340,7 @@ port_info(lua_State *L, port_info_t *pinfo)
                 (pinfo->fill_pattern_type == ABC_FILL_PATTERN)    ? "abcd..."
                 : (pinfo->fill_pattern_type == NO_FILL_PATTERN)   ? "None"
                 : (pinfo->fill_pattern_type == ZERO_FILL_PATTERN) ? "Zero"
+                : (pinfo->fill_pattern_type == HEX_FILL_PATTERN)  ? "Hex"
                                                                   : pinfo->user_pattern);
 
     if (rte_atomic64_read(&pinfo->transmit_count) == 0)

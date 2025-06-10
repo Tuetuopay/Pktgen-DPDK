@@ -185,12 +185,20 @@ pktgen_script_save(char *path)
                 (pinfo->fill_pattern_type == ABC_FILL_PATTERN)    ? "abc"
                 : (pinfo->fill_pattern_type == NO_FILL_PATTERN)   ? "none"
                 : (pinfo->fill_pattern_type == ZERO_FILL_PATTERN) ? "zero"
-                                                                  : "user");
+                : (pinfo->fill_pattern_type == USER_FILL_PATTERN) ? "user"
+                                                                  : "hex");
         if ((pinfo->fill_pattern_type == USER_FILL_PATTERN) && strlen(pinfo->user_pattern)) {
             char buff[64];
             memset(buff, 0, sizeof(buff));
             snprintf(buff, sizeof(buff), "%s", pinfo->user_pattern);
             fprintf(fd, "set %d user pattern %s\n", i, buff);
+        }
+        if ((pinfo->fill_pattern_type == HEX_FILL_PATTERN) && pinfo->hex_pattern_len) {
+            char buff[HEX_PATTERN_SIZE * 2 + 1];
+            memset(buff, 0, sizeof(buff));
+            for (int i = 0; i < (int)pinfo->hex_pattern_len; i++)
+                snprintf(&buff[i * 2], (HEX_PATTERN_SIZE - i) * 2, "%02x", pinfo->hex_pattern[i]);
+            fprintf(fd, "set %d hex pattern %ld %s\n", i, pinfo->hex_pattern_offset, buff);
         }
         fprintf(fd, "\n");
 
@@ -510,12 +518,20 @@ pktgen_lua_save(char *path)
                 (pinfo->fill_pattern_type == ABC_FILL_PATTERN)    ? "abc"
                 : (pinfo->fill_pattern_type == NO_FILL_PATTERN)   ? "none"
                 : (pinfo->fill_pattern_type == ZERO_FILL_PATTERN) ? "zero"
-                                                                  : "user");
+                : (pinfo->fill_pattern_type == USER_FILL_PATTERN) ? "user"
+                                                                  : "hex");
         if ((pinfo->fill_pattern_type == USER_FILL_PATTERN) && strlen(pinfo->user_pattern)) {
             char buff[64];
             memset(buff, 0, sizeof(buff));
             snprintf(buff, sizeof(buff), "%s", pinfo->user_pattern);
             fprintf(fd, "pktgen.userPattern('%d', '%s');\n", i, buff);
+        }
+        if ((pinfo->fill_pattern_type == HEX_FILL_PATTERN) && pinfo->hex_pattern_len) {
+            char buff[HEX_PATTERN_SIZE * 2 + 1];
+            memset(buff, 0, sizeof(buff));
+            for (int i = 0; i < (int)pinfo->hex_pattern_len; i++)
+                snprintf(&buff[i * 2], (HEX_PATTERN_SIZE - i) * 2, "%02x", pinfo->hex_pattern[i]);
+            fprintf(fd, "pktgen.hexPattern('%d', '%ld', '%s');\n", i, pinfo->hex_pattern_offset, buff);
         }
         fprintf(fd, "\n");
 
@@ -3202,6 +3218,8 @@ pattern_set_type(port_info_t *pinfo, char *str)
         pinfo->fill_pattern_type = USER_FILL_PATTERN;
     else if (strncmp(str, "zero", 4) == 0)
         pinfo->fill_pattern_type = ZERO_FILL_PATTERN;
+    else if (strncmp(str, "hex", 3) == 0)
+        pinfo->fill_pattern_type = HEX_FILL_PATTERN;
 }
 
 /**
@@ -3231,6 +3249,40 @@ pattern_set_user_pattern(port_info_t *pinfo, char *str)
     memset(pinfo->user_pattern, 0, USER_PATTERN_SIZE);
     snprintf(pinfo->user_pattern, USER_PATTERN_SIZE, "%s", cp);
     pinfo->fill_pattern_type = USER_FILL_PATTERN;
+}
+
+/**
+ *
+ * pattern_set_hex_pattern - Set the hex pattern byte array.
+ *
+ * DESCRIPTION
+ * Set the given hex pattern byte array.
+ *
+ * RETURNS: N/A
+ *
+ * SEE ALSO:
+ */
+
+void
+pattern_set_hex_pattern(port_info_t *pinfo, char *soffset, char *sbytes)
+{
+    size_t offset = strtoul(soffset, NULL, 0);
+    size_t len = strlen(sbytes);
+    uint8_t bytes[HEX_PATTERN_SIZE];
+
+    if (len > HEX_PATTERN_SIZE * 2)
+        len = HEX_PATTERN_SIZE * 2;
+    for (int i = 0; i < (int)len / 2; i++) {
+        char s[3] = {};
+        memcpy(s, sbytes, 2);
+        sbytes += 2;
+        bytes[i] = strtoul(s, NULL, 16);
+    }
+
+    memcpy(pinfo->hex_pattern, bytes, len / 2);
+    pinfo->hex_pattern_len = len / 2;
+    pinfo->hex_pattern_offset = offset;
+    pinfo->fill_pattern_type = HEX_FILL_PATTERN;
 }
 
 /**

@@ -133,6 +133,7 @@ pktgen_print_static_data(void)
                     (pinfo->fill_pattern_type == ABC_FILL_PATTERN)    ? "abcd..."
                     : (pinfo->fill_pattern_type == NO_FILL_PATTERN)   ? "None"
                     : (pinfo->fill_pattern_type == ZERO_FILL_PATTERN) ? "Zero"
+                    : (pinfo->fill_pattern_type == HEX_FILL_PATTERN)  ? "Hex"
                                                                       : pinfo->user_pattern);
         pktgen_transmit_count_rate(pid, buff, sizeof(buff));
         scrn_printf(row++, col, "%*s", COLUMN_WIDTH_1, buff);

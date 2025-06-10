@@ -162,7 +162,8 @@ pktgen_packet_rate(port_info_t *port)
  * SEE ALSO:
  */
 static __inline__ void
-pktgen_fill_pattern(uint8_t *p, uint16_t len, uint32_t type, char *user)
+pktgen_fill_pattern(uint8_t *p, uint16_t len, uint32_t type, char *user,
+                    uint8_t *hex, size_t hexlen, size_t hexoff)
 {
     uint32_t i;
 
@@ -171,6 +172,12 @@ pktgen_fill_pattern(uint8_t *p, uint16_t len, uint32_t type, char *user)
         memset(p, 0, len);
         for (i = 0; i < len; i++)
             p[i] = user[i & (USER_PATTERN_SIZE - 1)];
+        break;
+
+    case HEX_FILL_PATTERN:
+        memset(p, 0, len);
+        for (i = 0; i < len - hexoff; i++)
+            p[i + hexoff] = hex[i % hexlen];
         break;
 
     case NO_FILL_PATTERN:
@@ -491,7 +498,8 @@ pktgen_packet_ctor(port_info_t *pinfo, int32_t seq_idx, int32_t type)
                                                                  : RTE_ETHER_MAX_LEN;
 
     /* Fill in the pattern for data space. */
-    pktgen_fill_pattern((uint8_t *)pkt->hdr, pktsz, pinfo->fill_pattern_type, pinfo->user_pattern);
+    pktgen_fill_pattern((uint8_t *)pkt->hdr, pktsz, pinfo->fill_pattern_type, pinfo->user_pattern,
+                        pinfo->hex_pattern, pinfo->hex_pattern_len, pinfo->hex_pattern_offset);
 
     if (seq_idx == LATENCY_PKT) {
         latency_t *lat = &pinfo->latency;

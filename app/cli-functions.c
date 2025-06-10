@@ -527,8 +527,9 @@ static struct cli_map set_map[] = {
     {21, "set %P proto %|udp|tcp|icmp"},
     {22, "set %P src mac %m"},
     {23, "set %P dst mac %m"},
-    {24, "set %P pattern %|abc|none|user|zero"},
+    {24, "set %P pattern %|abc|none|user|hex|zero"},
     {25, "set %P user pattern %s"},
+    {26, "set %P hex pattern %d %s"},
     {30, "set %P src ip %4"},
     {31, "set %P dst ip %4"},
     {32, "set %P src ip %6"},
@@ -576,7 +577,9 @@ static const char *set_help[] = {
     "                        none       - No fill pattern, maybe random data",
     "                        zero       - Fill of zero bytes",
     "                        user       - User supplied string of max 16 bytes",
+    "                        hex        - User supplied hex byte sequence of max 64 bytes",
     "set <portlist> user pattern <string> - A 16 byte string, must set 'pattern user' command",
+    "set <portlist> hex pattern <offset> <bytes> - A 64 byte hex sequence, must set 'pattern hex' command",
     "set <portlist> [src|dst] ip ipaddr - Set IP addresses, Source must include network mask e.g. "
     "10.1.2.3/24",
     "set <portlist> tcp flags <string>  - Set comma delimited TCP flags: cwr,ece,urg,ack,psh,rst,syn,fin,clr",
@@ -709,6 +712,9 @@ set_cmd(int argc, char **argv)
         break;
     case 25:
         foreach_port(portlist, pattern_set_user_pattern(pinfo, argv[4]));
+        break;
+    case 26:
+        foreach_port(portlist, pattern_set_hex_pattern(pinfo, argv[4], argv[5]));
         break;
     case 30:
         p = strchr(argv[4], '/');

@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 #define USER_PATTERN_SIZE 16
+#define HEX_PATTERN_SIZE 64
 #define MAX_LATENCY_ENTRIES \
     50108        // Max 101000?, limited by max allowed size of latsamp_stats_t.data[]
 #define MAX_LATENCY_QUEUES 10
@@ -92,6 +93,7 @@ typedef enum {
     ZERO_FILL_PATTERN = 1,
     ABC_FILL_PATTERN,
     USER_FILL_PATTERN,
+    HEX_FILL_PATTERN,
     NO_FILL_PATTERN,
 } fill_t;
 
@@ -156,9 +158,12 @@ typedef struct port_info_s {
     uint32_t mpls_entry; /**< Set the port MPLS entry */
     uint32_t gre_key;    /**< GRE key if used */
 
-    struct rnd_bits_s *rnd_bitfields;     /**< Random bitfield settings */
-    char user_pattern[USER_PATTERN_SIZE]; /**< User set pattern values */
-    fill_t fill_pattern_type;             /**< Type of pattern to fill with */
+    struct rnd_bits_s *rnd_bitfields;      /**< Random bitfield settings */
+    char user_pattern[USER_PATTERN_SIZE];  /**< User set pattern values */
+    uint8_t hex_pattern[HEX_PATTERN_SIZE]; /**< User set hex pattern values */
+    size_t hex_pattern_len;                /**< User set hex pattern length, in bytes */
+    size_t hex_pattern_offset;             /**< User set hex pattern offset, in bytes */
+    fill_t fill_pattern_type;              /**< Type of pattern to fill with */
 
     union {
         uint64_t vxlan; /**< VxLAN 64 bit word */
