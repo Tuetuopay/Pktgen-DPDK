@@ -2027,6 +2027,9 @@ single_set_vxlan(port_info_t *pinfo, uint16_t flags, uint16_t group_id, uint32_t
     pinfo->seq_pkt[SINGLE_PKT].vni_flags = pinfo->vni_flags;
     pinfo->seq_pkt[SINGLE_PKT].group_id  = pinfo->group_id;
     pinfo->seq_pkt[SINGLE_PKT].vxlan_id  = pinfo->vxlan_id;
+    pinfo->range.vni_flags = pinfo->vni_flags;
+    pinfo->range.vxlan_gid = pinfo->group_id;
+    pinfo->range.vxlan_vid = pinfo->vxlan_id;
     pktgen_packet_ctor(pinfo, SINGLE_PKT, -1);
 }
 
